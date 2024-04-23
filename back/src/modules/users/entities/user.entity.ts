@@ -1,11 +1,4 @@
-import { getRounds, hashSync } from 'bcrypt';
-import {
-  BeforeInsert,
-  BeforeUpdate,
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('users')
 export class User {
@@ -29,17 +22,4 @@ export class User {
 
   @Column({ default: false })
   isAdmin: boolean;
-
-  @BeforeInsert()
-  @BeforeUpdate()
-  hashPassword() {
-    try {
-      const isEncrypted = getRounds(this.password);
-      if (!isEncrypted) {
-        this.password = hashSync(this.password, 10);
-      }
-    } catch {
-      this.password = hashSync(this.password, 10);
-    }
-  }
 }

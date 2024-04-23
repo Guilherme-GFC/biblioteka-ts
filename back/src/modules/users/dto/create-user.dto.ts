@@ -1,5 +1,20 @@
+import { hashSync } from 'bcrypt';
+import { Transform } from 'class-transformer';
+import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+
 export class CreateUserDto {
+  @IsString()
+  @IsNotEmpty()
   name: string;
+
+  @IsEmail()
   email: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(8)
+  @Transform(({ value }) => hashSync(value, 10), {
+    groups: ['transform'],
+  })
   password: string;
 }
