@@ -1,4 +1,7 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Follow } from 'src/modules/follows/entities/follow.entity';
+import { Loan } from 'src/modules/loans/entities/loan.entity';
+import { Review } from 'src/modules/reviews/entities/review.entity';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('users')
 export class User {
@@ -22,4 +25,13 @@ export class User {
 
   @Column({ default: false })
   isAdmin: boolean;
+
+  @ManyToOne(() => Loan, (loan) => loan.user)
+  loans: Loan[];
+
+  @ManyToOne(() => Review, (review) => review.user)
+  reviews: Review[];
+
+  @ManyToOne(() => Follow, (follow) => follow.user)
+  follows: Follow[];
 }
