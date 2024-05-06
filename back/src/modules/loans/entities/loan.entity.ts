@@ -1,6 +1,13 @@
 import { Copy } from 'src/modules/copies/entities/copy.entity';
 import { User } from 'src/modules/users/entities/user.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity('loans')
 export class Loan {
@@ -8,11 +15,17 @@ export class Loan {
   id: string;
 
   @Column()
-  returnAt: Date;
+  expiresIn: Date;
 
-  @OneToMany(() => User, (user) => user.loans)
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @Column({ default: null, nullable: true })
+  returnAt?: Date;
+
+  @ManyToOne(() => User, (user) => user.loans)
   user: User;
 
-  @OneToMany(() => Copy, (copy) => copy.loans)
+  @ManyToOne(() => Copy, (copy) => copy.loans, { cascade: ['update'] })
   copy: Copy;
 }

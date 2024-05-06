@@ -4,19 +4,21 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmModuleConfig } from './typeorm-module-config';
 import { BooksModule } from './modules/books/books.module';
 import { LoansModule } from './modules/loans/loans.module';
-import { CopiesModule } from './modules/copies/copies.module';
-import { ReviewsModule } from './modules/reviews/reviews.module';
 import { FollowsModule } from './modules/follows/follows.module';
+import { CopiesModule } from './modules/copies/copies.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TasksModule } from './modules/tasks/tasks.module';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(typeOrmModuleConfig()),
+    ScheduleModule.forRoot(),
+    TasksModule,
     UsersModule,
     BooksModule,
     LoansModule,
-    CopiesModule,
-    ReviewsModule,
     FollowsModule,
+    CopiesModule,
   ],
   controllers: [],
   providers: [],

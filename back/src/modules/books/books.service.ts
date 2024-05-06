@@ -1,9 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Book } from './entities/book.entity';
-import { Repository } from 'typeorm';
+import { EntityNotFoundError, Repository } from 'typeorm';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
+
+interface IBookRelations {
+  loans?: boolean;
+  reviews?: boolean;
+  follows?: boolean;
+}
 
 @Injectable()
 export class BooksService {
@@ -37,5 +47,17 @@ export class BooksService {
 
   async remove(id: string) {
     await this.bookRepository.delete({ id });
+  }
+
+  async findBookById(id: string, relations: IBookRelations = {}) {
+    return await this.bookRepository
+      .findOneOrFail({ where: { id }, relations: { ...relations } })
+      .catch((e) => {
+        if (e instanceof EntityNotFoundError) {
+          throw new NotFoundException('Book not found');
+        }
+        console.log(e);
+        throw new InternalServerErrorException();
+      });
   }
 }

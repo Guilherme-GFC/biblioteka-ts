@@ -13,12 +13,12 @@ export class Copy {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
-  isAvailable: boolean;
+  @Column({ nullable: true, default: null })
+  currentLoan?: string;
 
-  @OneToMany(() => Book, (book) => book.copies)
+  @ManyToOne(() => Book, (book) => book.copies)
   book: Book;
 
-  @ManyToOne(() => Loan, (loan) => loan.copy)
+  @OneToMany(() => Loan, (loan) => loan.copy)
   loans: Loan[];
 }

@@ -1,26 +1,43 @@
 import { Injectable } from '@nestjs/common';
-import { CreateFollowDto } from './dto/create-follow.dto';
-import { UpdateFollowDto } from './dto/update-follow.dto';
+import { Repository } from 'typeorm';
+import { Follow } from './entities/follow.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { BooksService } from '../books/books.service';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class FollowsService {
-  create(createFollowDto: CreateFollowDto) {
-    return 'This action adds a new follow';
+  constructor(
+    @InjectRepository(Follow)
+    private readonly followRepository: Repository<Follow>,
+    private booksService: BooksService,
+    private usersService: UsersService,
+  ) {}
+
+  async followBook(userId: string, bookId: string) {
+    const book = await this.booksService.findBookById(bookId);
+    const user = await this.usersService.findUserById(userId);
+
+    const newFollow = this.followRepository.create({
+      book,
+      user,
+    });
+
+    return await this.followRepository.save(newFollow);
   }
 
-  findAll() {
-    return `This action returns all follows`;
+  async unfollowBook(followId: string) {
+    await this.followRepository.delete(followId);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} follow`;
-  }
+  async followList(userId: string) {
+    const user = await this.usersService.findUserById(userId);
+    const followsList = await this.followRepository.find({
+      where: {
+        user: user,
+      },
+    });
 
-  update(id: number, updateFollowDto: UpdateFollowDto) {
-    return `This action updates a #${id} follow`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} follow`;
+    return followsList;
   }
 }

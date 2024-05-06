@@ -1,9 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityNotFoundError, Repository } from 'typeorm';
+import { plainToInstance } from 'class-transformer';
+
+interface IUserRelations {
+  loans?: boolean;
+  reviews?: boolean;
+  follows?: boolean;
+}
 
 @Injectable()
 export class UsersService {
@@ -13,15 +24,19 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto) {
     const user = this.userRepository.create(createUserDto);
-    return await this.userRepository.save(user);
+    await this.userRepository.save(user);
+
+    return plainToInstance(User, user);
   }
 
   async findAll() {
-    return await this.userRepository.find();
+    const users = await this.userRepository.find();
+    return plainToInstance(User, users);
   }
 
   async findOne(id: string) {
-    return await this.userRepository.findOneBy({ id });
+    const user = this.findUserById(id);
+    return plainToInstance(User, user);
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
@@ -31,10 +46,24 @@ export class UsersService {
       ...updateUserDto,
     });
 
-    return await this.userRepository.save(updatedUser);
+    const returnUser = await this.userRepository.save(updatedUser);
+
+    return plainToInstance(User, returnUser);
   }
 
   async remove(id: string) {
     await this.userRepository.delete(id);
+  }
+
+  async findUserById(id: string, relations: IUserRelations = {}) {
+    return await this.userRepository
+      .findOneOrFail({ where: { id: id }, relations: { ...relations } })
+      .catch((e) => {
+        if (e instanceof EntityNotFoundError)
+          throw new NotFoundException('User not Found');
+
+        console.log(e);
+        throw new InternalServerErrorException();
+      });
   }
 }

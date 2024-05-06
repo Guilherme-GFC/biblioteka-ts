@@ -1,7 +1,13 @@
+import { Exclude } from 'class-transformer';
 import { Follow } from 'src/modules/follows/entities/follow.entity';
 import { Loan } from 'src/modules/loans/entities/loan.entity';
-import { Review } from 'src/modules/reviews/entities/review.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity('users')
 export class User {
@@ -14,6 +20,7 @@ export class User {
   @Column({ unique: true })
   email: string;
 
+  @Exclude()
   @Column({ length: 127 })
   password: string;
 
@@ -21,17 +28,14 @@ export class User {
   isBlocked: boolean;
 
   @Column({ type: 'date', nullable: true, default: null })
-  startBlock: string | null;
+  releaseIn?: Date;
 
   @Column({ default: false })
   isAdmin: boolean;
 
-  @ManyToOne(() => Loan, (loan) => loan.user)
+  @OneToMany(() => Loan, (loan) => loan.user)
   loans: Loan[];
 
-  @ManyToOne(() => Review, (review) => review.user)
-  reviews: Review[];
-
-  @ManyToOne(() => Follow, (follow) => follow.user)
+  @OneToMany(() => Follow, (follow) => follow.user)
   follows: Follow[];
 }
